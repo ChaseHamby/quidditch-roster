@@ -28,11 +28,19 @@ const getAllPlayersFromDb = () => new Promise((resolve, reject) => {
 
 const getPlayersByTeam = teamId => new Promise((resolve, reject) => {
   axios
-    .get(`${baseUrl}/players.json`)
-    .then((data) => {
-      const allPlayers = data.data;
-      const correctPlayers = allPlayers.filter(x => x.teamId === teamId);
-      resolve(correctPlayers);
+    .get(`${baseUrl}/players.json?orderBy="teamId"&equalTo="${teamId}"`) // filters teamId
+    .then((result) => {
+      const allPlayersObject = result.data; // this is calling only the data from the axios call
+      const allPlayersArray = [];
+      if (allPlayersObject != null) {
+        Object.keys(allPlayersObject).forEach((playerId) => {
+          const newPlayer = allPlayersObject[playerId]; // bracket notation bc its calling strings
+          newPlayer.id = playerId;
+          allPlayersArray.push(newPlayer);
+        });
+      }
+      console.log('array?', allPlayersArray);
+      resolve(allPlayersArray);
     })
     .catch((err) => {
       reject(err);
